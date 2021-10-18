@@ -1,0 +1,98 @@
+# BUILD DOCKER IMAGE
+
+1.  Build package .deb
+    cd setup
+    package_deb.sh
+    then copy odoo-public/deb/odoo_13.0.20200308_all.deb to folder dockerize
+
+2.  Rename file odoo_13.0.20200308_all.deb inside Dockerfile, build docker:
+    docker build -t erp:13.0 .
+
+3.  Save image
+    docker save erp:13.0 > erp_13.0.tar
+
+4.  Upload to remote server then
+    docker load < erp_13.0.tar
+
+5.  Install fresh odoo inside docker:
+    odoo -c /etc/odoo/odoo.conf -i base --max-cron-threads=0 --stop-after-init --no-xmlrpc --no-http -d erp
+
+
+ # CREATE DB
+
+ create user hct with password "matkhau";
+ create database "db";
+ ALTER DATABASE name OWNER TO new_owner;
+ GRANT ALL PRIVILEGES ON DATABASE "db" TO hct;
+
+# Run valid https on localhost
+
+1. Install mkcert
+2. Setup root CA to browsers:
+    `mkcert -install`
+3. Create cert
+    `mkcert localhost ordomain`
+4. Copy created localhost.pem localhost-key.pem to dockerize folder to be loaded by nginx
+5. Run docker-compose.yml on root folder to have nginx proxied to odoo:8069
+   Access the site via: https://localhost:8888
+
+# Odoo CDN Filter
+
+^/[^/]+/static/
+^/web/(css|js)/
+^/web/image
+^/web/content
+^/website/image/
+
+
+     location ~* /(favicon.ico|service_worker.js|logo.png) {
+        proxy_pass {{ trim $proto }}://{{ trim $upstream_name }};
+        proxy_cache default_cache;
+        proxy_buffering on;
+        proxy_cache_valid 200 302 120m;
+        expires    864000;
+
+        proxy_hide_header "Set-Cookie";
+        proxy_hide_header cache-control;
+        proxy_ignore_headers "Set-Cookie";
+        proxy_ignore_headers X-Accel-Expires Expires Cache-Control;
+     }
+
+     location  ~* /[0-9a-zA-Z_]*/(static)/ {
+        proxy_cache default_cache;
+        proxy_pass {{ trim $proto }}://{{ trim $upstream_name }};
+        proxy_buffering on;
+        proxy_cache_valid 200 302 120m;
+        expires    864000;
+
+        proxy_hide_header "Set-Cookie";
+        proxy_hide_header cache-control;
+        proxy_ignore_headers "Set-Cookie";
+        proxy_ignore_headers X-Accel-Expires Expires Cache-Control;
+    }
+
+     location  ~* /[0-9a-zA-Z_]*/(image)/ {
+        proxy_cache default_cache;
+        proxy_pass {{ trim $proto }}://{{ trim $upstream_name }};
+        proxy_buffering on;
+        proxy_cache_valid 200 302 60m;
+        # expires    864000;
+
+        proxy_hide_header "Set-Cookie";
+        proxy_hide_header cache-control;
+        proxy_ignore_headers "Set-Cookie";
+        proxy_ignore_headers Cache-Control;
+    }
+
+    location  ~* /[0-9a-zA-Z_]*/(content)/(.+\.(scss|css|js))$ {
+        proxy_cache default_cache;
+        proxy_pass {{ trim $proto }}://{{ trim $upstream_name }};
+        proxy_buffering on;
+        proxy_cache_valid 200 302 10m;
+        # expires    864000;
+
+        proxy_hide_header "Set-Cookie";
+        proxy_hide_header cache-control;
+        proxy_ignore_headers "Set-Cookie";
+        proxy_ignore_headers Cache-Control;
+    }

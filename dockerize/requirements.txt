@@ -1,0 +1,25 @@
+#
+# Extra package for school erp
+#
+
+jingtrang==0.1.2
+phonenumbers==8.11.4
+facebook-sdk==3.1.0
+# firebase_admin
+
+google-auth==1.17.0
+# wheel  # this is for geoip2
+geoip2>=2.9.0
+
+authlib==0.15
+pymemcache
+pyhashxx
+cachetools
+
+# pattern matcher
+fuzzywuzzy==0.18.0
+python-Levenshtein==0.12.2
+docxtpl==0.11.5
+pycryptodome==3.10.1
+
+# google-cloud-translate==2.0.1
