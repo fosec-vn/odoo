@@ -1,0 +1,13 @@
+.git
+.idea
+.tx
+.vscode
+.github
+.DS_Store
+.gitignore
+venv
+env
+data
+README.md
+dockerize
+erp.tar
