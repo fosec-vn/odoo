@@ -1,0 +1,75 @@
+version: '2'
+
+services:
+
+  web:
+    image: erp:15.0
+    build:
+      context: ./dockerize
+#    restart: always
+    ports:
+      - "8069:8069"
+      - "8071:8071"
+      - "8072:8072"
+    volumes:
+      - odoo-web-data:/var/lib/odoo/
+      - ./GeoLite2-City.mmdb:/usr/share/GeoIP/GeoLite2-City.mmdb
+      - ../extra15:/mnt/extra-addons
+      - ../enterprise15:/mnt/enterprise
+    logging:
+      driver: "json-file"
+      options:
+          max-size: "10m"
+    environment:
+      - VIRTUAL_HOST=hct.schoolerp.vn
+      - VIRTUAL_PORT=8069
+
+
+  # for local development
+#  nginx:
+#    image: nginx:latest
+#    volumes:
+#      - ./dockerize/nginx.dev.conf:/etc/nginx/nginx.conf
+#      - ./dockerize/localhost.pem:/etc/ssl/nginx/server.crt
+#      - ./dockerize/localhost-key.pem:/etc/ssl/nginx/server.key
+#      - public-data:/public:ro
+#    network_mode: "host"
+#    ports:
+#      - 8069:8069
+#      - 8071:8071
+#      - 8072:8072
+#      - 443:443
+
+  db:
+    image: postgres:14
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_USER=odoo
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - odoo-db-dataa:/var/lib/postgresql/data/pgdata
+      - ./dockerize/postgresql.conf:/etc/postgresql/postgresql.conf
+    network_mode: "host"
+#    ports:
+#      - 5432:5432
+
+
+  adminer:
+    image: adminer
+#    network_mode: "host"
+    ports:
+      - 8080:8080
+
+volumes:
+  odoo-web-data:
+  odoo-db-dataa:
+#  public-data:
+#    driver: local
+#    driver_opts:
+#      o: bind
+#      type: none
+#      device: /home/voi/Projects/SchoolERP/src_odoo/public
+
+
+
