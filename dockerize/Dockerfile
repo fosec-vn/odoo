@@ -83,6 +83,7 @@ RUN apt-get remove -y build-essential && apt autoremove -y && rm -rf /var/lib/ap
 # Copy entrypoint script and Odoo configuration file
 COPY ./entrypoint.sh /
 COPY ./odoo.conf /etc/odoo/
+RUN ["chmod", "+x", "/entrypoint.sh"]
 
 # Set permissions and Mount /var/lib/odoo to allow restoring filestore and /mnt/extra-addons for users addons
 # chown before mount volume otherwise loosing chown permission
@@ -100,6 +101,7 @@ EXPOSE 8069 8072 8071
 ENV ODOO_RC /etc/odoo/odoo.conf
 
 COPY wait-for-psql.py /usr/local/bin/wait-for-psql.py
+RUN ["chmod", "+x", "/usr/local/bin/wait-for-psql.py"]
 
 # Set default user when running the container
 USER odoo
