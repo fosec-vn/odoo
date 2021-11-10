@@ -89,6 +89,8 @@ RUN ["chmod", "+x", "/entrypoint.sh"]
 # chown before mount volume otherwise loosing chown permission
 RUN chown odoo:odoo /etc/odoo/odoo.conf \
     && mkdir -p /mnt/extra-addons \
+    && mkdir -p /var/lib/odoo/nginx/conf.d \
+    && mkdir -p /var/lib/odoo/nginx/ssl \
     && chown -R odoo:odoo /var/lib/odoo \
     && chown -R odoo:odoo /usr/lib/python3/dist-packages/odoo \
     && chown -R odoo /mnt/extra-addons

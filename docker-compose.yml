@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 
 services:
 
@@ -7,15 +7,20 @@ services:
     build:
       context: ./dockerize
 #    restart: always
-    ports:
-      - "8069:8069"
-      - "8071:8071"
-      - "8072:8072"
+#    ports:
+#      - "8069:8069"
+#      - "8071:8071"
+#      - "8072:8072"
     volumes:
       - odoo-web-data:/var/lib/odoo/
-      - ./GeoLite2-City.mmdb:/usr/share/GeoIP/GeoLite2-City.mmdb
+      - ./dockerize/GeoLite2-City.mmdb:/usr/share/GeoIP/GeoLite2-City.mmdb
       - ../extra15:/mnt/extra-addons
       - ../enterprise15:/mnt/enterprise
+      - ./dockerize/odoo.conf:/etc/odoo/odoo.conf
+      - odoo-nginx-conf:/var/lib/odoo/nginx/conf.d
+      - odoo-nginx-ssl:/var/lib/odoo/nginx/ssl
+    depends_on:
+      - db
     logging:
       driver: "json-file"
       options:
@@ -26,31 +31,43 @@ services:
 
 
   # for local development
-#  nginx:
-#    image: nginx:latest
-#    volumes:
+  nginx:
+    image: nginx-erp:latest
+    build:
+      context: ./dockerize
+      dockerfile: Dockerfile-nginx
+    environment:
+      - ODOO_DOMAIN=localhost
+    volumes:
 #      - ./dockerize/nginx.dev.conf:/etc/nginx/nginx.conf
 #      - ./dockerize/localhost.pem:/etc/ssl/nginx/server.crt
 #      - ./dockerize/localhost-key.pem:/etc/ssl/nginx/server.key
 #      - public-data:/public:ro
-#    network_mode: "host"
-#    ports:
+      - odoo-nginx-conf:/etc/nginx/conf.d/odoo.d/:ro
+      - odoo-nginx-ssl:/etc/ssl/nginx/odoo/:ro
+      - ./dockerize/nginx-ssl.crt:/etc/ssl/nginx/odoo.crt:ro
+      - ./dockerize/nginx-ssl.key:/etc/ssl/nginx/odoo.key:ro
+    #    network_mode: "host"
+    ports:
 #      - 8069:8069
 #      - 8071:8071
 #      - 8072:8072
-#      - 443:443
+      - 80:80
+      - 443:443
+    depends_on:
+      - web
 
   db:
     image: postgres:14
     environment:
       - POSTGRES_DB=postgres
-      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_PASSWORD=rnZxZ5ZfVxaH1Pv3BP7y
       - POSTGRES_USER=odoo
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       - odoo-db-dataa:/var/lib/postgresql/data/pgdata
       - ./dockerize/postgresql.conf:/etc/postgresql/postgresql.conf
-    network_mode: "host"
+#    network_mode: "host"
 #    ports:
 #      - 5432:5432
 
@@ -64,6 +81,8 @@ services:
 volumes:
   odoo-web-data:
   odoo-db-dataa:
+  odoo-nginx-conf:
+  odoo-nginx-ssl:
 #  public-data:
 #    driver: local
 #    driver_opts:

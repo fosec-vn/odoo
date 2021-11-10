@@ -1,0 +1,8 @@
+FROM nginx:latest
+
+RUN apt update \
+    && apt install -y inotify-tools
+
+COPY ./nginx-default.conf.template /etc/nginx/templates/default.conf.template
+COPY nginx-reloader.sh /bin/
+COPY nginx-docker-entrypoint.sh /docker-entrypoint.sh

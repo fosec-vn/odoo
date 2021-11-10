@@ -23,3 +23,7 @@ docxtpl==0.11.5
 pycryptodome==3.10.1
 
 # google-cloud-translate==2.0.1
+
+# for letsencrypt
+acme
+dnspython
